@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CHAMA
 
-## Getting Started
+Serviços entre vizinhos em Rio Grande/RS.
 
-First, run the development server:
+O CHAMA conecta quem precisa de um serviço com prestadores locais. O cliente publica a tarefa, prestadores enviam orçamentos, e o melhor ganha. Simples, local e sem intermediários.
 
+## Funcionalidades
+
+- Publicação de tarefas com fotos, bairro e orçamento sugerido
+- Orçamentos enviados por prestadores com valor e prazo
+- Avaliação bidirecional após a conclusão
+- 20 categorias de serviço
+
+## Stack
+
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS)
+- **Supabase** (PostgreSQL, Auth, Storage)
+- **Deploy**: Vercel (planejado)
+
+## Como rodar localmente
+
+Pré-requisito: Node.js 20+ instalado.
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Crie um arquivo `.env.local` na raiz do projeto:
+```env
+NEXT_PUBLIC_SUPABASE_URL=COLE_A_URL_DO_PROJETO
+NEXT_PUBLIC_SUPABASE_ANON_KEY=COLE_A_CHAVE_ANONIMA
+```
 
-## Learn More
+As chaves ficam em **Supabase > Project Settings > API**. Nunca suba esse arquivo para o GitHub.
 
-To learn more about Next.js, take a look at the following resources:
+## Roadmap
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [x] Landing page
+- [x] Estrutura do banco de dados
+- [x] Categorias de serviço
+- [ ] Cadastro e login
+- [ ] Publicação de tarefas
+- [ ] Orçamentos
+- [ ] Avaliações
+- [ ] PWA (instalável no celular)
+- [ ] Publicação nas lojas (Capacitor)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Licença
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
