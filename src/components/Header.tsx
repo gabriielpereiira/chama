@@ -6,31 +6,52 @@ export function Header() {
     <header className="bg-[#1e3a5f] text-white">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center" aria-label="CHAMA - Página inicial">
-          <svg viewBox="0 0 280 64" className="h-11 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CHAMA - Serviços entre vizinhos">
-            {/* Mão esquerda - silhueta estilizada em posição de namaste */}
-            <path d="M26 52 C18 50 12 42 12 32 C12 22 16 14 22 12 C28 10 32 14 34 18 C36 22 36 28 34 34 C32 40 30 48 26 52 Z" fill="#ffffff" />
-            {/* Mão direita - espelhada */}
-            <path d="M54 52 C62 50 68 42 68 32 C68 22 64 14 58 12 C52 10 48 14 46 18 C44 22 44 28 46 34 C48 40 50 48 54 52 Z" fill="#ffffff" />
-            {/* Detalhes dos dedos - mão esquerda */}
-            <path d="M18 14 C20 10 24 8 26 10" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" fill="none" />
-            <path d="M22 12 C24 8 28 6 30 8" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" fill="none" />
-            {/* Detalhes dos dedos - mão direita */}
-            <path d="M62 14 C60 10 56 8 54 10" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" fill="none" />
-            <path d="M58 12 C56 8 52 6 50 8" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" fill="none" />
-            {/* Oval central laranja entre as palmas */}
-            <ellipse cx="40" cy="32" rx="6" ry="14" fill="#e67e22" />
-            {/* Núcleo interno do oval */}
-            <ellipse cx="40" cy="32" rx="2.5" ry="6" fill="#ffffff" />
-            {/* Ondas sonoras - 3 arcos crescentes à direita */}
-            <path d="M50 24 C54 24 56 28 56 32 C56 36 54 40 50 40" stroke="#e67e22" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-            <path d="M56 20 C61 20 64 26 64 32 C64 38 61 44 56 44" stroke="#e67e22" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-            <path d="M62 16 C68 16 72 24 72 32 C72 40 68 48 62 48" stroke="#e67e22" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-            {/* Wordmark CHAMA */}
-            <text x="80" y="44" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="36" letterSpacing="2">
+          <svg
+            viewBox="0 0 320 72"
+            className="h-11 w-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="CHAMA - Serviços entre vizinhos"
+          >
+            {/* Grupo do ícone, levemente inclinado como na logo original */}
+            <g transform="rotate(-6 56 38)">
+              {/* Mão esquerda */}
+              <path
+                d="M14 58 C9 46 9 32 17 24 C21 20 27 16 33 16 C39 16 43 20 45 26 C45 34 43 44 39 54 C35 60 23 62 14 58 Z"
+                fill="#ffffff"
+              />
+              {/* Linhas dos dedos - mão esquerda */}
+              <path d="M21 22 C22 30 23 42 22 52" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              <path d="M29 20 C30 28 31 40 30 50" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              {/* Mão direita */}
+              <path
+                d="M98 58 C103 46 103 32 95 24 C91 20 85 16 79 16 C73 16 69 20 67 26 C67 34 69 44 73 54 C77 60 89 62 98 58 Z"
+                fill="#ffffff"
+              />
+              {/* Linhas dos dedos - mão direita */}
+              <path d="M91 22 C90 30 89 42 90 52" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              <path d="M83 20 C82 28 81 40 82 50" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              {/* Oval vertical entre as palmas */}
+              <rect x="49" y="20" width="14" height="34" rx="7" fill="#e67e22" />
+              {/* Núcleo interno do oval (originalmente navy, adaptado para branco) */}
+              <rect x="53.5" y="25" width="5" height="24" rx="2.5" fill="#ffffff" />
+              {/* Ondas sonoras à direita do ícone */}
+              <path d="M104 28 C110 28 114 34 114 42" stroke="#e67e22" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+              <path d="M110 22 C118 22 123 30 123 42" stroke="#e67e22" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+            </g>
+            {/* Wordmark CHAMA com as cores da logo (navy adaptado para branco) */}
+            <text
+              x="132"
+              y="47"
+              fontFamily="Arial, Helvetica, sans-serif"
+              fontWeight="800"
+              fontSize="42"
+              letterSpacing="3"
+            >
               <tspan fill="#e67e22">C</tspan>
               <tspan fill="#ffffff">H</tspan>
               <tspan fill="#e67e22">A</tspan>
-              <tspan fill="#e67e22">M</tspan>
+              <tspan fill="#ffffff">M</tspan>
               <tspan fill="#ffffff">A</tspan>
             </text>
           </svg>
