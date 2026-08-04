@@ -7,45 +7,47 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center" aria-label="CHAMA - Página inicial">
           <svg
-            viewBox="0 0 320 72"
-            className="h-11 w-auto"
+            viewBox="0 0 360 90"
+            className="h-12 w-auto"
             xmlns="http://www.w3.org/2000/svg"
             role="img"
             aria-label="CHAMA - Serviços entre vizinhos"
           >
-            {/* Grupo do ícone, levemente inclinado como na logo original */}
-            <g transform="rotate(-6 56 38)">
-              {/* Mão esquerda */}
-              <path
-                d="M14 58 C9 46 9 32 17 24 C21 20 27 16 33 16 C39 16 43 20 45 26 C45 34 43 44 39 54 C35 60 23 62 14 58 Z"
-                fill="#ffffff"
-              />
-              {/* Linhas dos dedos - mão esquerda */}
-              <path d="M21 22 C22 30 23 42 22 52" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-              <path d="M29 20 C30 28 31 40 30 50" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-              {/* Mão direita */}
-              <path
-                d="M98 58 C103 46 103 32 95 24 C91 20 85 16 79 16 C73 16 69 20 67 26 C67 34 69 44 73 54 C77 60 89 62 98 58 Z"
-                fill="#ffffff"
-              />
-              {/* Linhas dos dedos - mão direita */}
-              <path d="M91 22 C90 30 89 42 90 52" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-              <path d="M83 20 C82 28 81 40 82 50" stroke="#1e3a5f" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-              {/* Oval vertical entre as palmas */}
-              <rect x="49" y="20" width="14" height="34" rx="7" fill="#e67e22" />
-              {/* Núcleo interno do oval (originalmente navy, adaptado para branco) */}
-              <rect x="53.5" y="25" width="5" height="24" rx="2.5" fill="#ffffff" />
-              {/* Ondas sonoras à direita do ícone */}
-              <path d="M104 28 C110 28 114 34 114 42" stroke="#e67e22" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-              <path d="M110 22 C118 22 123 30 123 42" stroke="#e67e22" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+            {/* Mão esquerda em concha, dedos para cima, inclinada para o centro */}
+            <path
+              d="M16 80 Q8 66 11 50 Q13 36 19 30 Q23 24 29 27 Q35 30 37 40 Q41 54 38 70 Q36 80 16 80 Z"
+              fill="#ffffff"
+            />
+            {/* Linhas internas dos dedos - mão esquerda */}
+            <path d="M21 29 Q20 40 21 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M26 28 Q25 40 26 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M31 30 Q31 42 31 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            {/* Mão direita em concha, espelhada */}
+            <path
+              d="M104 80 Q112 66 109 50 Q107 36 101 30 Q97 24 91 27 Q85 30 83 40 Q79 54 82 70 Q84 80 104 80 Z"
+              fill="#ffffff"
+            />
+            {/* Linhas internas dos dedos - mão direita */}
+            <path d="M99 29 Q100 40 99 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M94 28 Q95 40 94 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M89 30 Q89 42 89 52" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinecap="round" />
+            {/* Oval vertical central entre as palmas */}
+            <rect x="50" y="16" width="20" height="60" rx="10" fill="#e67e22" />
+            {/* Núcleo interno do oval */}
+            <rect x="56.5" y="26" width="7" height="40" rx="3.5" fill="#ffffff" />
+            {/* Ondas sonoras à direita do ícone */}
+            <g stroke="#e67e22" strokeWidth="3" fill="none" strokeLinecap="round">
+              <path d="M112 34 Q116 38 116 44" />
+              <path d="M118 28 Q124 34 124 48" />
+              <path d="M124 22 Q132 32 132 52" />
             </g>
-            {/* Wordmark CHAMA com as cores da logo (navy adaptado para branco) */}
+            {/* Wordmark CHAMA com as cores da referência (navy adaptado para branco) */}
             <text
-              x="132"
-              y="47"
+              x="142"
+              y="66"
               fontFamily="Arial, Helvetica, sans-serif"
               fontWeight="800"
-              fontSize="42"
+              fontSize="44"
               letterSpacing="3"
             >
               <tspan fill="#e67e22">C</tspan>
