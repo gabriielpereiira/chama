@@ -41,17 +41,33 @@ export function Avaliacao({
   async function carregarAvaliacoes() {
     const { data, error } = await supabase
       .from("avaliacoes")
-      .select("*, avaliador:usuarios(nome)")
+      .select("*")
       .eq("tarefa_id", tarefaId);
 
     if (error) {
       setErro("Não foi possível carregar as avaliações.");
+      setCarregando(false);
       return;
     }
 
-    const normalizadas = (data ?? []).map((a: any) => ({
+    const lista = (data ?? []) as Avaliacao[];
+
+    const idsAvaliadores = [...new Set(lista.map((a) => a.avaliador_id))];
+
+    let nomes: Record<string, string> = {};
+    if (idsAvaliadores.length > 0) {
+      const { data: perfis } = await supabase
+        .from("perfis_publicos")
+        .select("id, nome")
+        .in("id", idsAvaliadores);
+      nomes = Object.fromEntries(
+        (perfis ?? []).map((p: { id: string; nome: string }) => [p.id, p.nome])
+      );
+    }
+
+    const normalizadas = lista.map((a) => ({
       ...a,
-      avaliador_nome: a.avaliador?.nome ?? "Usuário",
+      avaliador_nome: nomes[a.avaliador_id] ?? "Usuário",
     }));
 
     setAvaliacoes(normalizadas);
@@ -87,7 +103,7 @@ export function Avaliacao({
       return;
     }
 
-    // Ao avaliar, libera a avaliação que você recebeu do outro lado
+    // Trava do Airbnb: ao avaliar, libera a avaliação que o outro lado deixou sobre você
     await supabase
       .from("avaliacoes")
       .update({ visivel_para_avaliado: true })
@@ -125,6 +141,14 @@ export function Avaliacao({
   if (carregando) {
     return <p className="text-gray-500 text-sm">Carregando avaliações...</p>;
   }
+
+  const recebiAvaliacaoBloqueada = avaliacoes.some(
+    (a) => a.avaliado_id === usuarioLogadoId && !a.visivel_para_avaliado
+  );
+
+  const avaliacoesVisiveis = avaliacoes.filter(
+    (a) => !(a.avaliado_id === usuarioLogadoId && !a.visivel_para_avaliado)
+  );
 
   return (
     <div className="space-y-6">
@@ -180,14 +204,22 @@ export function Avaliacao({
         </p>
       )}
 
+      {recebiAvaliacaoBloqueada && (
+        <p className="text-sm text-[#1e3a5f] bg-[#1e3a5f]/5 border border-[#1e3a5f]/20 rounded-xl p-3">
+          Você recebeu uma avaliação. Envie a sua para liberar a leitura.
+        </p>
+      )}
+
       <div className="space-y-4">
-        {avaliacoes.length === 0 && (
+        {avaliacoesVisiveis.length === 0 && (
           <p className="text-sm text-gray-500">
-            Ainda não há avaliações para esta tarefa.
+            {recebiAvaliacaoBloqueada
+              ? "A avaliação que você recebeu será exibida assim que você enviar a sua."
+              : "Ainda não há avaliações para esta tarefa."}
           </p>
         )}
 
-        {avaliacoes.map((avaliacao) => {
+        {avaliacoesVisiveis.map((avaliacao) => {
           const souAvaliado = avaliacao.avaliado_id === usuarioLogadoId;
           const possoResponder = souAvaliado && !avaliacao.resposta;
 
