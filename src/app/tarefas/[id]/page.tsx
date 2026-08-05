@@ -52,6 +52,7 @@ export default function DetalheTarefaPage() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const [souCliente, setSouCliente] = useState(false);
+  const [ehAdmin, setEhAdmin] = useState(false);
   const [nomeCliente, setNomeCliente] = useState("Usuário");
   const [carregando, setCarregando] = useState(true);
   const [naoEncontrada, setNaoEncontrada] = useState(false);
@@ -87,6 +88,13 @@ export default function DetalheTarefaPage() {
     const tarefa = t as unknown as Tarefa;
     setTarefa(tarefa);
     setSouCliente(uid === tarefa.cliente_id);
+
+    const { data: meuPerfil } = await supabase
+      .from("usuarios")
+      .select("tipo")
+      .eq("id", uid)
+      .single();
+    setEhAdmin(meuPerfil?.tipo === "admin");
 
     const { data: perfil } = await supabase
       .from("perfis_publicos")
@@ -227,8 +235,23 @@ export default function DetalheTarefaPage() {
   const orcamentoAceito = orcamentos.find((o) => o.status === "aceito");
   const souPrestadorAceito =
     !!orcamentoAceito && orcamentoAceito.prestador_id === usuarioId;
+
+  const possoEnviarOrcamento =
+    tarefa.status === "aberta" && (!souCliente || ehAdmin) && !meuOrcamento;
+
+  const modoTestePrestador = ehAdmin && souCliente && tarefa.status === "aberta";
+
+  const autoTeste =
+    ehAdmin &&
+    souCliente &&
+    !!orcamentoAceito &&
+    orcamentoAceito.prestador_id === usuarioId;
+
   const possoAvaliar =
-    tarefa.status === "concluida" && !!orcamentoAceito && (souCliente || souPrestadorAceito);
+    tarefa.status === "concluida" &&
+    !!orcamentoAceito &&
+    (souCliente || souPrestadorAceito || ehAdmin);
+
   const outroLadoId = souCliente
     ? orcamentoAceito?.prestador_id
     : tarefa.cliente_id;
@@ -254,6 +277,11 @@ export default function DetalheTarefaPage() {
           >
             {tarefa.status === "aberta" ? "Aberta" : "Concluída"}
           </span>
+          {ehAdmin && (
+            <span className="bg-[#1e3a5f] text-white text-xs font-semibold px-3 py-1 rounded-full">
+              Admin
+            </span>
+          )}
         </div>
 
         <h1 className="text-3xl font-bold text-[#1e3a5f] mb-3">
@@ -312,7 +340,14 @@ export default function DetalheTarefaPage() {
         </p>
       )}
 
-      {souCliente && tarefa.status === "aberta" && (
+      {modoTestePrestador && (
+        <p className="text-sm text-[#1e3a5f] bg-[#1e3a5f]/5 border border-dashed border-[#1e3a5f]/40 rounded-xl p-3 mb-6">
+          Modo teste: você é o cliente desta tarefa, mas como admin pode simular
+          o papel de prestador enviando um orçamento para ela.
+        </p>
+      )}
+
+      {(souCliente || ehAdmin) && tarefa.status === "aberta" && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
           <h2 className="text-xl font-bold text-[#1e3a5f] mb-4">
             Orçamentos recebidos ({orcamentos.length})
@@ -394,70 +429,58 @@ export default function DetalheTarefaPage() {
         </div>
       )}
 
-      {!souCliente && tarefa.status === "aberta" && (
+      {possoEnviarOrcamento && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
           <h2 className="text-xl font-bold text-[#1e3a5f] mb-4">
             Enviar orçamento
           </h2>
-
-          {meuOrcamento ? (
-            <p className="text-sm text-gray-600">
-              Você já enviou um orçamento para esta tarefa (
-              <span className="font-medium">{formatarMoeda(meuOrcamento.valor)}</span>
-              {meuOrcamento.prazo ? `, prazo de ${meuOrcamento.prazo}` : ""}).{" "}
-              {meuOrcamento.status === "aceito"
-                ? "Ele foi aceito. Combine os detalhes com o cliente."
-                : "Aguarde o cliente decidir."}
-            </p>
-          ) : (
-            <form onSubmit={enviarOrcamento} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Valor (R$)
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    value={valor}
-                    onChange={(e) => setValor(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    placeholder="Ex: 200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Prazo</label>
-                  <input
-                    type="text"
-                    value={prazo}
-                    onChange={(e) => setPrazo(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    placeholder="Ex: 2 dias"
-                  />
-                </div>
-              </div>
+          <form onSubmit={enviarOrcamento} className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Mensagem ao cliente
+                  Valor (R$)
                 </label>
-                <textarea
-                  value={mensagem}
-                  onChange={(e) => setMensagem(e.target.value)}
-                  rows={3}
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  required
+                  value={valor}
+                  onChange={(e) => setValor(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  placeholder="Conte sua experiência e por que você é a escolha certa."
+                  placeholder="Ex: 200"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={enviando}
-                className="bg-[#e67e22] hover:bg-[#d35400] text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60"
-              >
-                {enviando ? "Enviando..." : "Enviar orçamento"}
-              </button>
-            </form>
-          )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Prazo</label>
+                <input
+                  type="text"
+                  value={prazo}
+                  onChange={(e) => setPrazo(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  placeholder="Ex: 2 dias"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Mensagem ao cliente
+              </label>
+              <textarea
+                value={mensagem}
+                onChange={(e) => setMensagem(e.target.value)}
+                rows={3}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="Conte sua experiência e por que você é a escolha certa."
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={enviando}
+              className="bg-[#e67e22] hover:bg-[#d35400] text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60"
+            >
+              {enviando ? "Enviando..." : "Enviar orçamento"}
+            </button>
+          </form>
         </div>
       )}
 
@@ -467,7 +490,7 @@ export default function DetalheTarefaPage() {
         </p>
       )}
 
-      {possoAvaliar && usuarioId && outroLadoId && (
+      {possoAvaliar && usuarioId && !autoTeste && outroLadoId && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
           <Avaliacao
             tarefaId={tarefa.id}
@@ -475,6 +498,38 @@ export default function DetalheTarefaPage() {
             outroLadoId={outroLadoId}
             tarefaConcluida={true}
           />
+        </div>
+      )}
+
+      {autoTeste && usuarioId && (
+        <div className="space-y-6">
+          <p className="text-sm text-[#1e3a5f] bg-[#1e3a5f]/5 border border-dashed border-[#1e3a5f]/40 rounded-xl p-3">
+            Modo teste: você é cliente e prestador desta tarefa. Avalie os dois
+            lados para validar a trava do Airbnb (cada lado só vê a avaliação
+            que recebeu depois de avaliar o outro).
+          </p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-[#1e3a5f] mb-4">
+              Avaliando como cliente
+            </h2>
+            <Avaliacao
+              tarefaId={tarefa.id}
+              usuarioLogadoId={usuarioId}
+              outroLadoId={orcamentoAceito?.prestador_id ?? usuarioId}
+              tarefaConcluida={true}
+            />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-[#1e3a5f] mb-4">
+              Avaliando como prestador
+            </h2>
+            <Avaliacao
+              tarefaId={tarefa.id}
+              usuarioLogadoId={usuarioId}
+              outroLadoId={tarefa.cliente_id}
+              tarefaConcluida={true}
+            />
+          </div>
         </div>
       )}
     </main>
