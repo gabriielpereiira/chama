@@ -16,6 +16,9 @@ export function Header() {
           <Link href="/como-funciona" className="hover:text-[#e67e22] transition-colors">
             Como funciona
           </Link>
+          <Link href="/login" className="hover:text-[#e67e22] transition-colors">
+          Entrar
+          </Link>
           <Link
             href="/cadastro"
             className="bg-[#e67e22] hover:bg-[#d35400] px-4 py-2 rounded-lg font-medium transition-colors"
