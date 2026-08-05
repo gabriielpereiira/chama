@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-type Passo = {
+type Etapa = {
   numero: number;
   titulo: string;
   descricao: string;
 };
 
-const passosCliente: Passo[] = [
+const passosCliente: Etapa[] = [
   {
     numero: 1,
     titulo: "Crie sua conta",
@@ -34,7 +34,7 @@ const passosCliente: Passo[] = [
   },
 ];
 
-const passosPrestador: Passo[] = [
+const passosPrestador: Etapa[] = [
   {
     numero: 1,
     titulo: "Crie sua conta",
@@ -62,7 +62,7 @@ const passosPrestador: Passo[] = [
   },
 ];
 
-const ciclo: Passo[] = [
+const ciclo: Etapa[] = [
   { numero: 1, titulo: "Anunciar", descricao: "O cliente publica o que precisa." },
   { numero: 2, titulo: "Orçar", descricao: "Prestadores enviam propostas." },
   { numero: 3, titulo: "Comparar", descricao: "O cliente analisa valor, prazo e avaliações." },
@@ -116,8 +116,8 @@ const faq = [
 function Seta() {
   return (
     <svg
-      width="26"
-      height="26"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       className="text-[#e67e22]"
@@ -136,28 +136,36 @@ function Seta() {
 
 export default function ComoFuncionaPage() {
   return (
-    <main>
-      <section className="bg-[#162c47] text-white py-20">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p className="uppercase tracking-widest text-sm text-[#e67e22] font-semibold mb-3">
+    <main className="overflow-hidden">
+      {/* HERO com efeito uau */}
+      <section className="relative bg-[#1e3a5f] text-white overflow-hidden">
+        {/* blobs decorativos */}
+        <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-[#e67e22]/20 blur-3xl" />
+        <div className="absolute -bottom-24 -right-16 w-[28rem] h-[28rem] rounded-full bg-[#e67e22]/10 blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-white/5 blur-2xl" />
+
+        <div className="relative max-w-6xl mx-auto px-4 py-24 md:py-32 text-center">
+          <p className="uppercase tracking-[0.3em] text-sm text-[#e67e22] font-semibold mb-4 animate-pulse">
             Guia rápido
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Como funciona o CHAMA
+          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
+            Dê o grito,
+            <br />
+            <span className="text-[#e67e22]">a vizinhança responde.</span>
           </h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">
+          <p className="text-white/80 max-w-2xl mx-auto text-lg md:text-xl mb-10">
             O jeito simples e seguro de pedir ajuda e oferecer serviços para quem mora perto de você.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/cadastro"
-              className="bg-[#e67e22] hover:bg-[#d35400] px-6 py-3 rounded-xl font-medium transition-colors"
+              className="bg-[#e67e22] hover:bg-[#d35400] px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105"
             >
               Quero anunciar um serviço
             </Link>
             <Link
               href="/cadastro"
-              className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-medium transition-colors"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105"
             >
               Quero oferecer serviços
             </Link>
@@ -165,18 +173,19 @@ export default function ComoFuncionaPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      {/* DOIS CAMINHOS */}
+      <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-[#1e3a5f] text-center mb-3">
+          <h2 className="text-4xl font-black text-[#1e3a5f] text-center mb-3">
             Duas maneiras de usar o CHAMA
           </h2>
-          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-14 text-lg">
             O CHAMA funciona para os dois lados da rua: quem precisa de ajuda e quem resolve. Você pode ser os dois.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-[#1e3a5f] mb-2">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-3xl p-8 shadow-sm">
+              <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
                 Quem precisa de um serviço
               </h3>
               <p className="text-sm text-gray-600 mb-8">
@@ -185,7 +194,7 @@ export default function ComoFuncionaPage() {
               <ol className="space-y-6">
                 {passosCliente.map((passo) => (
                   <li key={passo.numero} className="flex gap-4">
-                    <span className="w-10 h-10 rounded-full bg-[#1e3a5f] text-white font-bold flex items-center justify-center shrink-0">
+                    <span className="w-11 h-11 rounded-full bg-[#1e3a5f] text-white font-bold flex items-center justify-center shrink-0 shadow-md">
                       {passo.numero}
                     </span>
                     <div>
@@ -197,8 +206,8 @@ export default function ComoFuncionaPage() {
               </ol>
             </div>
 
-            <div className="bg-[#1e3a5f] rounded-2xl p-8 text-white">
-              <h3 className="text-xl font-bold mb-2">
+            <div className="bg-gradient-to-br from-[#1e3a5f] to-[#162c47] rounded-3xl p-8 text-white shadow-xl">
+              <h3 className="text-2xl font-bold mb-2">
                 Quem oferece um serviço
               </h3>
               <p className="text-sm text-white/70 mb-8">
@@ -207,7 +216,7 @@ export default function ComoFuncionaPage() {
               <ol className="space-y-6">
                 {passosPrestador.map((passo) => (
                   <li key={passo.numero} className="flex gap-4">
-                    <span className="w-10 h-10 rounded-full bg-[#e67e22] text-white font-bold flex items-center justify-center shrink-0">
+                    <span className="w-11 h-11 rounded-full bg-[#e67e22] text-white font-bold flex items-center justify-center shrink-0 shadow-md">
                       {passo.numero}
                     </span>
                     <div>
@@ -222,24 +231,29 @@ export default function ComoFuncionaPage() {
         </div>
       </section>
 
-      <section className="bg-[#1e3a5f] py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-white text-center mb-3">
+      {/* CICLO DO SERVIÇO */}
+      <section className="relative bg-[#1e3a5f] py-20 overflow-hidden">
+        <div className="absolute top-0 left-1/3 w-80 h-80 rounded-full bg-[#e67e22]/10 blur-3xl" />
+        <div className="relative max-w-6xl mx-auto px-4">
+          <h2 className="text-4xl font-black text-white text-center mb-3">
             O ciclo de um serviço no CHAMA
           </h2>
-          <p className="text-white/80 text-center max-w-2xl mx-auto mb-12">
+          <p className="text-white/80 text-center max-w-2xl mx-auto mb-14 text-lg">
             Seis momentos conectam quem precisa com quem resolve, do primeiro anúncio à avaliação final.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {ciclo.map((etapa) => (
-              <div key={etapa.numero} className="bg-white rounded-2xl p-6 shadow-lg">
+              <div
+                key={etapa.numero}
+                className="bg-white rounded-3xl p-7 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-11 h-11 rounded-full bg-[#e67e22] text-white font-bold flex items-center justify-center text-lg">
+                  <span className="w-12 h-12 rounded-full bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white font-black flex items-center justify-center text-xl shadow-md">
                     {etapa.numero}
                   </span>
                   {etapa.numero < ciclo.length && <Seta />}
                 </div>
-                <h3 className="font-semibold text-[#1e3a5f] text-lg mb-1">{etapa.titulo}</h3>
+                <h3 className="font-bold text-[#1e3a5f] text-xl mb-1">{etapa.titulo}</h3>
                 <p className="text-sm text-gray-600">{etapa.descricao}</p>
               </div>
             ))}
@@ -247,18 +261,25 @@ export default function ComoFuncionaPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-gray-50">
+      {/* DIFERENCIAIS */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-[#1e3a5f] text-center mb-3">
+          <h2 className="text-4xl font-black text-[#1e3a5f] text-center mb-3">
             Por que usar o CHAMA
           </h2>
-          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-14 text-lg">
             Uma rede de confiança construída entre vizinhos, com transparência em cada etapa.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {diferenciais.map((item) => (
-              <div key={item.titulo} className="bg-white border border-gray-200 rounded-2xl p-6">
-                <h3 className="font-semibold text-[#1e3a5f] mb-2">{item.titulo}</h3>
+            {diferenciais.map((item, i) => (
+              <div
+                key={item.titulo}
+                className="bg-white border border-gray-200 rounded-3xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all"
+              >
+                <span className="w-12 h-12 rounded-2xl bg-[#1e3a5f]/5 text-[#e67e22] font-black flex items-center justify-center text-xl mb-4">
+                  {i + 1}
+                </span>
+                <h3 className="font-bold text-[#1e3a5f] mb-2">{item.titulo}</h3>
                 <p className="text-sm text-gray-600">{item.descricao}</p>
               </div>
             ))}
@@ -266,41 +287,45 @@ export default function ComoFuncionaPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      {/* FAQ */}
+      <section className="py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-[#1e3a5f] text-center mb-10">
+          <h2 className="text-4xl font-black text-[#1e3a5f] text-center mb-10">
             Perguntas frequentes
           </h2>
           <div className="space-y-4">
             {faq.map((item) => (
               <details
                 key={item.pergunta}
-                className="group bg-gray-50 border border-gray-200 rounded-xl p-5"
+                className="group bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:border-[#e67e22]/50 transition-colors"
               >
-                <summary className="flex items-center justify-between cursor-pointer font-medium text-[#1e3a5f] list-none [&::-webkit-details-marker]:hidden">
+                <summary className="flex items-center justify-between cursor-pointer font-semibold text-[#1e3a5f] list-none [&::-webkit-details-marker]:hidden">
                   {item.pergunta}
                   <span className="text-[#e67e22] text-2xl leading-none transition-transform duration-200 group-open:rotate-45">
                     +
                   </span>
                 </summary>
-                <p className="text-sm text-gray-600 mt-3">{item.resposta}</p>
+                <p className="text-gray-600 mt-3">{item.resposta}</p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#e67e22] py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
-          <h2 className="text-3xl font-bold mb-3">
+      {/* CHAMADA FINAL */}
+      <section className="relative bg-gradient-to-br from-[#e67e22] to-[#d35400] py-20 overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -bottom-16 -left-10 w-80 h-80 rounded-full bg-white/10 blur-2xl" />
+        <div className="relative max-w-4xl mx-auto px-4 text-center text-white">
+          <h2 className="text-4xl md:text-5xl font-black mb-4">
             Pronto para dar o primeiro grito?
           </h2>
-          <p className="text-white/90 text-lg mb-8">
+          <p className="text-white/90 text-xl mb-10">
             Crie sua conta e anuncie o que você precisa, ou ative o perfil de prestador e comece a oferecer seu trabalho.
           </p>
           <Link
             href="/cadastro"
-            className="inline-block bg-[#1e3a5f] hover:bg-[#162c47] text-white px-8 py-4 rounded-xl font-semibold transition-colors"
+            className="inline-block bg-[#1e3a5f] hover:bg-[#162c47] text-white px-10 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105"
           >
             Criar minha conta agora
           </Link>
