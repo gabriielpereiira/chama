@@ -23,7 +23,7 @@ type Orcamento = {
   tarefa_id: string;
   prestador_id: string;
   valor: number | null;
-  prazo: string | null;
+  prazo_execucao: string | null;
   mensagem: string | null;
   status: string;
   created_at: string;
@@ -89,7 +89,6 @@ export default function DetalheTarefaPage() {
     setTarefa(tarefa);
     setSouCliente(uid === tarefa.cliente_id);
 
-    // Detecção de admin via função no banco (ignora RLS de usuarios)
     const { data: ehAdminData } = await supabase.rpc("is_admin");
     setEhAdmin(!!ehAdminData);
 
@@ -150,7 +149,7 @@ export default function DetalheTarefaPage() {
       tarefa_id: tarefaId,
       prestador_id: usuarioId,
       valor: Number(valor.replace(",", ".")),
-      prazo: prazo.trim() || null,
+      prazo_execucao: prazo.trim() || null,
       mensagem: mensagem.trim() || null,
       status: "pendente",
     });
@@ -158,7 +157,7 @@ export default function DetalheTarefaPage() {
     setEnviando(false);
 
     if (error) {
-      setErro(`Erro ao enviar (${error.code}): ${error.message}`);
+      setErro("Não foi possível enviar o orçamento. Tente de novo.");
       return;
     }
 
@@ -382,9 +381,9 @@ export default function DetalheTarefaPage() {
                           : "Pendente"}
                     </span>
                   </div>
-                  {o.prazo && (
+                  {o.prazo_execucao && (
                     <p className="text-sm text-gray-600 mb-1">
-                      Prazo: {o.prazo}
+                      Prazo: {o.prazo_execucao}
                     </p>
                   )}
                   {o.mensagem && (
