@@ -31,7 +31,6 @@ export function Avaliacao({
   tarefaConcluida,
 }: Props) {
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
-  const [jaAvaliei, setJaAvaliei] = useState(false);
   const [nota, setNota] = useState(5);
   const [comentario, setComentario] = useState("");
   const [resposta, setResposta] = useState("");
@@ -71,7 +70,6 @@ export function Avaliacao({
     }));
 
     setAvaliacoes(normalizadas);
-    setJaAvaliei(normalizadas.some((a) => a.avaliador_id === usuarioLogadoId));
     setCarregando(false);
   }
 
@@ -79,6 +77,26 @@ export function Avaliacao({
     carregarAvaliacoes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tarefaId]);
+
+  const jaAvalieiEsteLado = avaliacoes.some(
+    (a) => a.avaliador_id === usuarioLogadoId && a.avaliado_id === outroLadoId
+  );
+
+  const recebiAvaliacaoBloqueada = avaliacoes.some(
+    (a) =>
+      a.avaliador_id === outroLadoId &&
+      a.avaliado_id === usuarioLogadoId &&
+      !a.visivel_para_avaliado
+  );
+
+  const avaliacoesVisiveis = avaliacoes.filter(
+    (a) =>
+      !(
+        a.avaliador_id === outroLadoId &&
+        a.avaliado_id === usuarioLogadoId &&
+        !a.visivel_para_avaliado
+      )
+  );
 
   async function enviarAvaliacao(e: React.FormEvent) {
     e.preventDefault();
@@ -142,21 +160,11 @@ export function Avaliacao({
     return <p className="text-gray-500 text-sm">Carregando avaliações...</p>;
   }
 
-  const recebiAvaliacaoBloqueada = avaliacoes.some(
-    (a) => a.avaliado_id === usuarioLogadoId && !a.visivel_para_avaliado
-  );
-
-  const avaliacoesVisiveis = avaliacoes.filter(
-    (a) => !(a.avaliado_id === usuarioLogadoId && !a.visivel_para_avaliado)
-  );
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-[#1e3a5f]">Avaliações</h2>
-
+    <div className="space-y-5">
       {erro && <p className="text-sm text-red-600">{erro}</p>}
 
-      {!jaAvaliei && tarefaConcluida && (
+      {!jaAvalieiEsteLado && tarefaConcluida && (
         <form
           onSubmit={enviarAvaliacao}
           className="bg-gray-50 border border-gray-200 rounded-2xl p-5 space-y-4"
