@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "../lib/supabase";
 
 const categories = [
   { name: "Montagem de Móveis", icon: "🪑" },
@@ -10,6 +14,16 @@ const categories = [
 ];
 
 export default function Home() {
+  const [usuarioId, setUsuarioId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUsuarioId(data.user?.id ?? null);
+    });
+  }, []);
+
+  const hrefPublicar = usuarioId ? "/criar-tarefa" : "/cadastro";
+
   return (
     <div>
       {/* Hero */}
@@ -23,7 +37,7 @@ export default function Home() {
             região, escolha o melhor e pague com segurança.
           </p>
           <Link
-            href="/cadastro"
+            href={hrefPublicar}
             className="bg-[#e67e22] hover:bg-[#d35400] text-white px-8 py-4 rounded-lg text-lg font-semibold inline-block transition-colors"
           >
             Publicar um serviço
@@ -93,15 +107,13 @@ export default function Home() {
       {/* CTA final */}
       <section className="bg-[#e67e22] text-white py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Pronto para começar?
-          </h2>
+          <h2 className="text-3xl font-bold mb-4">Pronto para começar?</h2>
           <p className="text-lg text-white/90 mb-8">
             Publique seu primeiro serviço gratuitamente e receba orçamentos de
             prestadores de Rio Grande.
           </p>
           <Link
-            href="/cadastro"
+            href={hrefPublicar}
             className="bg-white text-[#e67e22] hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold inline-block transition-colors"
           >
             Quero publicar um serviço
