@@ -6,13 +6,13 @@ export async function GET() {
 
   if (!supabaseUrl || !serviceKey) {
     return NextResponse.json(
-      { error: "Variáveis de ambiente ausentes (NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY)" },
+      { error: "Variáveis de ambiente ausentes" },
       { status: 500 }
     );
   }
 
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/obter_esquema`, {
       headers: {
         apikey: serviceKey,
         Authorization: `Bearer ${serviceKey}`,
@@ -27,12 +27,8 @@ export async function GET() {
       );
     }
 
-    const spec = await res.json();
-    const tables = Object.keys(spec?.paths ?? {}).filter(
-      (p) => !p.includes("/rpc/")
-    );
-
-    return NextResponse.json({ tables });
+    const data = await res.json();
+    return NextResponse.json({ schema: data });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
