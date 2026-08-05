@@ -67,7 +67,7 @@ export default function ListaTarefasPage() {
     }
 
     query.then(({ data, error }) => {
-      setTarefas(((data ?? []) as Tarefa[]));
+      setTarefas((data ?? []) as Tarefa[]);
       setErro(error ? "Não foi possível carregar as tarefas." : "");
       setCarregando(false);
     });
