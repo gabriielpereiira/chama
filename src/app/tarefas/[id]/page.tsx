@@ -158,7 +158,7 @@ export default function DetalheTarefaPage() {
     setEnviando(false);
 
     if (error) {
-      setErro("Não foi possível enviar o orçamento. Tente de novo.");
+      setErro(`Erro ao enviar (${error.code}): ${error.message}`);
       return;
     }
 
