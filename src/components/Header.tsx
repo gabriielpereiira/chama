@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "../lib/supabase";
 
 export function Header() {
-  const [usuario, setUsuario] = useState<{ email: string } | null>(null);
+  const [usuario, setUsuario] = useState<{ email?: string } | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
