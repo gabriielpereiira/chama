@@ -89,12 +89,9 @@ export default function DetalheTarefaPage() {
     setTarefa(tarefa);
     setSouCliente(uid === tarefa.cliente_id);
 
-    const { data: meuPerfil } = await supabase
-      .from("usuarios")
-      .select("tipo")
-      .eq("id", uid)
-      .single();
-    setEhAdmin(meuPerfil?.tipo === "admin");
+    // Detecção de admin via função no banco (ignora RLS de usuarios)
+    const { data: ehAdminData } = await supabase.rpc("is_admin");
+    setEhAdmin(!!ehAdminData);
 
     const { data: perfil } = await supabase
       .from("perfis_publicos")
