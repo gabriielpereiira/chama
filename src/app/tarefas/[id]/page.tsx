@@ -1,11 +1,9 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../../lib/supabase";
 import { Avaliacao } from "../../../components/Avaliacao";
-
 type Tarefa = {
   id: string;
   cliente_id: string;
@@ -17,7 +15,6 @@ type Tarefa = {
   created_at: string;
   categorias?: { nome: string } | null;
 };
-
 type Orcamento = {
   id: string;
   tarefa_id: string;
@@ -28,42 +25,37 @@ type Orcamento = {
   status: string;
   created_at: string;
 };
-
 const formatarMoeda = (valor: number | null | undefined) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(valor ?? 0);
-
 const formatarData = (iso: string) =>
   new Date(iso).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-
 export default function DetalheTarefaPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const tarefaId = params.id;
-
   const [tarefa, setTarefa] = useState<Tarefa | null>(null);
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [fotos, setFotos] = useState<string[]>([]);
+  const [fotoAmpliada, setFotoAmpliada] = useState<string | null>(null);
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const [souCliente, setSouCliente] = useState(false);
   const [ehAdmin, setEhAdmin] = useState(false);
   const [nomeCliente, setNomeCliente] = useState("Usuário");
   const [carregando, setCarregando] = useState(true);
   const [naoEncontrada, setNaoEncontrada] = useState(false);
-
   const [valor, setValor] = useState("");
   const [prazo, setPrazo] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
   const [mensagemOk, setMensagemOk] = useState("");
-
   async function buscarOrcamentos() {
     const { data } = await supabase
       .from("orcamentos")
@@ -71,46 +63,37 @@ export default function DetalheTarefaPage() {
       .eq("tarefa_id", tarefaId);
     setOrcamentos((data ?? []) as Orcamento[]);
   }
-
   async function buscarTarefa(uid: string) {
     const { data: t, error } = await supabase
       .from("tarefas")
       .select("*, categorias(nome)")
       .eq("id", tarefaId)
       .single();
-
     if (error || !t) {
       setNaoEncontrada(true);
       setCarregando(false);
       return;
     }
-
     const tarefa = t as unknown as Tarefa;
     setTarefa(tarefa);
     setSouCliente(uid === tarefa.cliente_id);
-
     const { data: ehAdminData } = await supabase.rpc("is_admin");
     setEhAdmin(!!ehAdminData);
-
     const { data: perfil } = await supabase
       .from("perfis_publicos")
       .select("nome")
       .eq("id", tarefa.cliente_id)
       .single();
     if (perfil) setNomeCliente((perfil as { nome: string }).nome);
-
     const { data: fotosData } = await supabase
       .from("fotos_tarefa")
       .select("url")
       .eq("tarefa_id", tarefaId);
     setFotos(((fotosData ?? []) as { url: string }[]).map((f) => f.url));
-
     setCarregando(false);
   }
-
   useEffect(() => {
     let ativo = true;
-
     async function iniciar() {
       const { data: sessao } = await supabase.auth.getUser();
       if (!sessao.user) {
@@ -118,33 +101,35 @@ export default function DetalheTarefaPage() {
         return;
       }
       if (!ativo) return;
-
       const uid = sessao.user.id;
       setUsuarioId(uid);
       await buscarTarefa(uid);
       await buscarOrcamentos();
     }
-
     iniciar();
     return () => {
       ativo = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tarefaId]);
-
+  useEffect(() => {
+    if (!fotoAmpliada) return;
+    function aoTeclar(e: KeyboardEvent) {
+      if (e.key === "Escape") setFotoAmpliada(null);
+    }
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [fotoAmpliada]);
   async function enviarOrcamento(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
     setMensagemOk("");
-
     if (!usuarioId || !tarefa) return;
     if (!valor.trim()) {
       setErro("Informe o valor do orçamento.");
       return;
     }
-
     setEnviando(true);
-
     const { error } = await supabase.from("orcamentos").insert({
       tarefa_id: tarefaId,
       prestador_id: usuarioId,
@@ -153,21 +138,17 @@ export default function DetalheTarefaPage() {
       mensagem: mensagem.trim() || null,
       status: "pendente",
     });
-
     setEnviando(false);
-
     if (error) {
       setErro("Não foi possível enviar o orçamento. Tente de novo.");
       return;
     }
-
     setValor("");
     setPrazo("");
     setMensagem("");
     setMensagemOk("Orçamento enviado com sucesso.");
     await buscarOrcamentos();
   }
-
   async function aceitarOrcamento(id: string) {
     setErro("");
     setMensagemOk("");
@@ -183,7 +164,6 @@ export default function DetalheTarefaPage() {
       .eq("status", "pendente");
     await buscarOrcamentos();
   }
-
   async function recusarOrcamento(id: string) {
     await supabase
       .from("orcamentos")
@@ -191,7 +171,6 @@ export default function DetalheTarefaPage() {
       .eq("id", id);
     await buscarOrcamentos();
   }
-
   async function concluirTarefa() {
     setErro("");
     setMensagemOk("");
@@ -202,7 +181,6 @@ export default function DetalheTarefaPage() {
     await buscarTarefa(usuarioId ?? "");
     await buscarOrcamentos();
   }
-
   if (carregando) {
     return (
       <main className="max-w-3xl mx-auto px-4 py-12">
@@ -210,7 +188,6 @@ export default function DetalheTarefaPage() {
       </main>
     );
   }
-
   if (naoEncontrada || !tarefa) {
     return (
       <main className="max-w-3xl mx-auto px-4 py-12 text-center">
@@ -226,32 +203,25 @@ export default function DetalheTarefaPage() {
       </main>
     );
   }
-
   const meuOrcamento = orcamentos.find((o) => o.prestador_id === usuarioId);
   const orcamentoAceito = orcamentos.find((o) => o.status === "aceito");
   const souPrestadorAceito =
     !!orcamentoAceito && orcamentoAceito.prestador_id === usuarioId;
-
   const possoEnviarOrcamento =
     tarefa.status === "aberta" && (!souCliente || ehAdmin) && !meuOrcamento;
-
   const modoTestePrestador = ehAdmin && souCliente && tarefa.status === "aberta";
-
   const autoTeste =
     ehAdmin &&
     souCliente &&
     !!orcamentoAceito &&
     orcamentoAceito.prestador_id === usuarioId;
-
   const possoAvaliar =
     tarefa.status === "concluida" &&
     !!orcamentoAceito &&
     (souCliente || souPrestadorAceito || ehAdmin);
-
   const outroLadoId = souCliente
     ? orcamentoAceito?.prestador_id
     : tarefa.cliente_id;
-
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
       <Link
@@ -260,7 +230,6 @@ export default function DetalheTarefaPage() {
       >
         Voltar para as tarefas
       </Link>
-
       <div className="bg-white border border-gray-200 rounded-2xl p-8 mb-6">
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="bg-[#e67e22]/10 text-[#d35400] text-xs font-semibold px-3 py-1 rounded-full">
@@ -279,17 +248,14 @@ export default function DetalheTarefaPage() {
             </span>
           )}
         </div>
-
         <h1 className="text-3xl font-bold text-[#1e3a5f] mb-3">
           {tarefa.titulo}
         </h1>
-
         {tarefa.descricao && (
           <p className="text-gray-700 whitespace-pre-line mb-6">
             {tarefa.descricao}
           </p>
         )}
-
         <div className="grid sm:grid-cols-2 gap-4 text-sm border-t border-gray-100 pt-5">
           <div>
             <p className="text-gray-500">Bairro</p>
@@ -314,41 +280,69 @@ export default function DetalheTarefaPage() {
             </p>
           </div>
         </div>
-
         {fotos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
             {fotos.map((url, i) => (
-              <img
+              <button
                 key={`${url}-${i}`}
-                src={url}
-                alt={`Foto da tarefa ${i + 1}`}
-                className="rounded-xl object-cover w-full h-32"
-              />
+                type="button"
+                onClick={() => setFotoAmpliada(url)}
+                className="group relative overflow-hidden rounded-xl"
+                aria-label={`Ampliar foto ${i + 1}`}
+              >
+                <img
+                  src={url}
+                  alt={`Foto da tarefa ${i + 1}`}
+                  className="rounded-xl object-cover w-full h-32 transition-transform group-hover:scale-105"
+                />
+                <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100">
+                    Ampliar
+                  </span>
+                </span>
+              </button>
             ))}
           </div>
         )}
       </div>
-
+      {fotoAmpliada && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setFotoAmpliada(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setFotoAmpliada(null)}
+            className="absolute top-4 right-4 text-white text-3xl leading-none hover:text-gray-300"
+            aria-label="Fechar imagem"
+          >
+            ×
+          </button>
+          <img
+            src={fotoAmpliada}
+            alt="Foto da tarefa ampliada"
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
       {erro && <p className="text-sm text-red-600 mb-4">{erro}</p>}
       {mensagemOk && (
         <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
           {mensagemOk}
         </p>
       )}
-
       {modoTestePrestador && (
         <p className="text-sm text-[#1e3a5f] bg-[#1e3a5f]/5 border border-dashed border-[#1e3a5f]/40 rounded-xl p-3 mb-6">
           Modo teste: você é o cliente desta tarefa, mas como admin pode simular
           o papel de prestador enviando um orçamento para ela.
         </p>
       )}
-
       {(souCliente || ehAdmin) && tarefa.status === "aberta" && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
           <h2 className="text-xl font-bold text-[#1e3a5f] mb-4">
             Orçamentos recebidos ({orcamentos.length})
           </h2>
-
           {orcamentos.length === 0 ? (
             <p className="text-sm text-gray-500">
               Nenhum orçamento ainda. Assim que os prestadores enviarem, eles
@@ -409,7 +403,6 @@ export default function DetalheTarefaPage() {
               ))}
             </div>
           )}
-
           {orcamentoAceito ? (
             <button
               onClick={concluirTarefa}
@@ -424,7 +417,6 @@ export default function DetalheTarefaPage() {
           )}
         </div>
       )}
-
       {possoEnviarOrcamento && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
           <h2 className="text-xl font-bold text-[#1e3a5f] mb-4">
@@ -479,13 +471,11 @@ export default function DetalheTarefaPage() {
           </form>
         </div>
       )}
-
       {tarefa.status === "concluida" && orcamentoAceito && !possoAvaliar && (
         <p className="text-sm text-gray-500 mb-6">
           As avaliações ficam disponíveis para quem participou do serviço.
         </p>
       )}
-
       {possoAvaliar && usuarioId && !autoTeste && outroLadoId && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
           <Avaliacao
@@ -496,7 +486,6 @@ export default function DetalheTarefaPage() {
           />
         </div>
       )}
-
       {autoTeste && usuarioId && (
         <div className="space-y-6">
           <p className="text-sm text-[#1e3a5f] bg-[#1e3a5f]/5 border border-dashed border-[#1e3a5f]/40 rounded-xl p-3">
