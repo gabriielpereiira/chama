@@ -6,6 +6,9 @@ import { supabase } from "../../lib/supabase";
 
 type Categoria = { id: string; nome: string };
 
+const TAMANHO_MAXIMO_MB = 5;
+const TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024;
+
 export default function CriarTarefaPage() {
   const router = useRouter();
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
@@ -17,6 +20,7 @@ export default function CriarTarefaPage() {
   const [orcamento, setOrcamento] = useState("");
   const [fotos, setFotos] = useState<File[]>([]);
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
+  const [erroFotos, setErroFotos] = useState("");
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -40,7 +44,31 @@ export default function CriarTarefaPage() {
   function adicionarFotos(e: React.ChangeEvent<HTMLInputElement>) {
     const arquivos = Array.from(e.target.files ?? []);
     if (arquivos.length === 0) return;
-    const novas = arquivos.slice(0, 5 - fotos.length);
+    setErroFotos("");
+
+    const rejeitadas = arquivos.filter((f) => f.size > TAMANHO_MAXIMO_BYTES);
+    if (rejeitadas.length > 0) {
+      setErroFotos(
+        `Imagens acima de ${TAMANHO_MAXIMO_MB}MB não são aceitas. ${
+          rejeitadas.length === 1
+            ? "Essa imagem foi ignorada."
+            : "Essas imagens foram ignoradas."
+        }`
+      );
+    }
+
+    const aceitas = arquivos.filter((f) => f.size <= TAMANHO_MAXIMO_BYTES);
+    if (aceitas.length === 0) {
+      e.target.value = "";
+      return;
+    }
+
+    const vagas = 5 - fotos.length;
+    const novas = aceitas.slice(0, vagas);
+    if (aceitas.length > vagas) {
+      setErroFotos("Você pode anexar no máximo 5 fotos. As demais foram ignoradas.");
+    }
+
     setFotos((atual) => [...atual, ...novas]);
     setFotosPreview((atual) => [
       ...atual,
@@ -62,9 +90,7 @@ export default function CriarTarefaPage() {
       setErro("Escolha uma categoria para o serviço.");
       return;
     }
-
     setSalvando(true);
-
     const { data, error } = await supabase
       .from("tarefas")
       .insert({
@@ -78,13 +104,11 @@ export default function CriarTarefaPage() {
       })
       .select("id")
       .single();
-
     if (error || !data) {
       setSalvando(false);
       setErro("Não foi possível publicar a tarefa. Tente de novo.");
       return;
     }
-
     // Upload das fotos para o storage e registro na tabela fotos_tarefa
     if (fotos.length > 0) {
       const registros: { tarefa_id: string; url: string }[] = [];
@@ -106,7 +130,6 @@ export default function CriarTarefaPage() {
         await supabase.from("fotos_tarefa").insert(registros);
       }
     }
-
     setSalvando(false);
     router.push(`/tarefas/${data.id}`);
   }
@@ -136,7 +159,6 @@ export default function CriarTarefaPage() {
             placeholder="Ex: Preciso de um eletricista para trocar uma tomada"
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1">Categoria</label>
           {categorias.length > 0 ? (
@@ -159,7 +181,6 @@ export default function CriarTarefaPage() {
             </p>
           )}
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1">Descrição</label>
           <textarea
@@ -170,7 +191,6 @@ export default function CriarTarefaPage() {
             placeholder="Detalhe o serviço: o que precisa, tamanho, urgência, materiais..."
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1">
             Fotos do serviço (opcional, até 5)
@@ -183,8 +203,9 @@ export default function CriarTarefaPage() {
             className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#1e3a5f] file:text-white file:font-medium file:cursor-pointer hover:file:bg-[#162c47]"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Anexe fotos para o prestador ter uma ideia clara do serviço.
+            Anexe fotos para o prestador ter uma ideia clara do serviço. Máximo de 5 fotos, até {TAMANHO_MAXIMO_MB}MB cada.
           </p>
+          {erroFotos && <p className="text-sm text-red-600 mt-2">{erroFotos}</p>}
           {fotosPreview.length > 0 && (
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-3">
               {fotosPreview.map((preview, i) => (
@@ -207,7 +228,6 @@ export default function CriarTarefaPage() {
             </div>
           )}
         </div>
-
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Bairro</label>
@@ -219,7 +239,6 @@ export default function CriarTarefaPage() {
               placeholder="Ex: Centro"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">
               Orçamento sugerido (R$)
@@ -234,9 +253,7 @@ export default function CriarTarefaPage() {
             />
           </div>
         </div>
-
         {erro && <p className="text-sm text-red-600">{erro}</p>}
-
         <div className="flex gap-3">
           <button
             type="submit"
