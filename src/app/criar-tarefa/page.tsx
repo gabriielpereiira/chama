@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,6 +15,8 @@ export default function CriarTarefaPage() {
   const [categoriaId, setCategoriaId] = useState("");
   const [bairro, setBairro] = useState("");
   const [orcamento, setOrcamento] = useState("");
+  const [fotos, setFotos] = useState<File[]>([]);
+  const [fotosPreview, setFotosPreview] = useState<string[]>([]);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -27,21 +28,35 @@ export default function CriarTarefaPage() {
         return;
       }
       setUsuarioId(data.user.id);
-
       const { data: cats } = await supabase
         .from("categorias")
         .select("id, nome")
         .order("nome");
-
       setCategorias((cats ?? []) as Categoria[]);
       setCarregando(false);
     });
   }, [router]);
 
+  function adicionarFotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const arquivos = Array.from(e.target.files ?? []);
+    if (arquivos.length === 0) return;
+    const novas = arquivos.slice(0, 5 - fotos.length);
+    setFotos((atual) => [...atual, ...novas]);
+    setFotosPreview((atual) => [
+      ...atual,
+      ...novas.map((f) => URL.createObjectURL(f)),
+    ]);
+    e.target.value = "";
+  }
+
+  function removerFoto(index: number) {
+    setFotos((atual) => atual.filter((_, i) => i !== index));
+    setFotosPreview((atual) => atual.filter((_, i) => i !== index));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
-
     if (!usuarioId) return;
     if (!categoriaId) {
       setErro("Escolha uma categoria para o serviço.");
@@ -64,13 +79,35 @@ export default function CriarTarefaPage() {
       .select("id")
       .single();
 
-    setSalvando(false);
-
     if (error || !data) {
+      setSalvando(false);
       setErro("Não foi possível publicar a tarefa. Tente de novo.");
       return;
     }
 
+    // Upload das fotos para o storage e registro na tabela fotos_tarefa
+    if (fotos.length > 0) {
+      const registros: { tarefa_id: string; url: string }[] = [];
+      for (const foto of fotos) {
+        const caminho = `${data.id}/${Date.now()}-${foto.name.replace(/\s+/g, "-")}`;
+        const { error: uploadError } = await supabase.storage
+          .from("tarefas")
+          .upload(caminho, foto);
+        if (uploadError) continue;
+        const { data: publicUrlData } = supabase.storage
+          .from("tarefas")
+          .getPublicUrl(caminho);
+        registros.push({
+          tarefa_id: data.id,
+          url: publicUrlData.publicUrl,
+        });
+      }
+      if (registros.length > 0) {
+        await supabase.from("fotos_tarefa").insert(registros);
+      }
+    }
+
+    setSalvando(false);
     router.push(`/tarefas/${data.id}`);
   }
 
@@ -84,13 +121,9 @@ export default function CriarTarefaPage() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">
-        Anunciar um serviço
+      <h1 className="text-2xl font-bold text-[#1e3a5f] mb-6">
+        Publicar tarefa
       </h1>
-      <p className="text-gray-600 mb-8">
-        Conte o que você precisa e os prestadores da região vão enviar orçamentos.
-      </p>
-
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium mb-1">Título</label>
@@ -106,20 +139,21 @@ export default function CriarTarefaPage() {
 
         <div>
           <label className="block text-sm font-medium mb-1">Categoria</label>
-          <select
-            required
-            value={categoriaId}
-            onChange={(e) => setCategoriaId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          >
-            <option value="">Selecione...</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome}
-              </option>
-            ))}
-          </select>
-          {categorias.length === 0 && (
+          {categorias.length > 0 ? (
+            <select
+              required
+              value={categoriaId}
+              onChange={(e) => setCategoriaId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="">Selecione uma categoria</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nome}
+                </option>
+              ))}
+            </select>
+          ) : (
             <p className="text-xs text-gray-500 mt-1">
               Nenhuma categoria cadastrada. Rode o SQL do Bloco 2 (seed de categorias).
             </p>
@@ -135,6 +169,43 @@ export default function CriarTarefaPage() {
             className="w-full border border-gray-300 rounded-lg px-3 py-2"
             placeholder="Detalhe o serviço: o que precisa, tamanho, urgência, materiais..."
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Fotos do serviço (opcional, até 5)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={adicionarFotos}
+            className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#1e3a5f] file:text-white file:font-medium file:cursor-pointer hover:file:bg-[#162c47]"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Anexe fotos para o prestador ter uma ideia clara do serviço.
+          </p>
+          {fotosPreview.length > 0 && (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-3">
+              {fotosPreview.map((preview, i) => (
+                <div key={preview} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Prévia da foto ${i + 1}`}
+                    className="rounded-lg object-cover w-full h-20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removerFoto(i)}
+                    className="absolute -top-2 -right-2 bg-red-600 text-white w-6 h-6 rounded-full text-sm leading-none hover:bg-red-700"
+                    aria-label="Remover foto"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -176,7 +247,7 @@ export default function CriarTarefaPage() {
           </button>
           <Link
             href="/tarefas"
-            className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-6 py-2.5 rounded-lg transition-colors"
+            className="text-gray-500 hover:text-gray-800 py-2.5 px-4"
           >
             Cancelar
           </Link>
